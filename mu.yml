@@ -1,0 +1,45 @@
+environments:
+- name: test
+  provider: ecs
+  cluster:
+    instanceType: t2.large
+    osType: amazon
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 6
+    keyName: ecs-ssh
+    sshAllow: 0.0.0.0/0
+    targetCPUReservation: 75
+    targetMemoryReservation: 75
+
+pipeline:
+  source:
+    provider: GitHub
+    repo: johndlong73/mu-workshop-lab1
+    branch: master
+  build:
+    disabled: false                         # Disable the build stage of the pipeline (default: false)
+    image: aws/codebuild/java:openjdk-8     # The image to use for CodeBuild job (default: aws/codebuild/ubuntu-base:latest)
+    type: linuxContainer
+    computeType: BUILD_GENERAL1_SMALL       # The type of compute instance for builds (default: BUILD_GENERAL1_SMALL)
+  acceptance:
+    disabled: false                         # Disable the acceptance stage of the pipeline (default: false)
+    environment: acceptance                 # The environment name to deploy to for testing (default: acceptance)
+    image: aws/codebuild/java:openjdk-8     # The image to use for CodeBuild test job (default: aws/codebuild/ubuntu-base:latest)
+    type: linuxContainer
+    computeType: BUILD_GENERAL1_SMALL       # The type of compute instance for testing builds (default: BUILD_GENERAL1_SMALL)
+  production:
+    disabled: false                         # Disable the production stage of the pipeline (default: false)
+    environment: production                 # The environment name to deploy to for production (default: production)
+
+  notify:                                   # List of email addresses to notify on pipeline results
+  - joe@getmu.io
+  - bob@getmu.io
+
+  kmsKey:
+
+  
+service:
+  port: 8080
+  pathPatterns:
+  - /bananas*
